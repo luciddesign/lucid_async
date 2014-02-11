@@ -1,19 +1,4 @@
 module LucidAsync
-
-  # Make asynchronous API requests. For convenience, enables calling any
-  # method asynchronously with the +_async+ suffix.
-  #
-  #     def wait_a_long_time
-  #       sleep 60
-  #     end
-  #
-  #     wait_a_long_time_async
-  #
-  # Essential for use with ActiveRecord to avoid having to (and having to
-  # remember to) manually close connections.
-  #
-  #     async { SomeAPI.product( 123 ).save }
-  #
   module Mixin
 
     def self.included( base )
@@ -58,6 +43,15 @@ module LucidAsync
 
     private
 
+    # For convenience, allow calling any method asynchronously with the
+    # +_async+ suffix.
+    #
+    #     def wait_a_long_time
+    #       sleep 60
+    #     end
+    #
+    #     wait_a_long_time_async
+    #
     def method_missing( sym, *args, &block )
       if method = method_missing_check( sym )
         async { send( method, *args, &block ) }
@@ -81,6 +75,8 @@ module LucidAsync
 
     # Need to close thread local ActiveRecord connections to prevent dead
     # connections blocking on the connection pool.
+    #
+    #     async { SomeAPI.product( 123 ).save }
     #
     def close_connection
       if defined?( ::ActiveRecord::Base ) && ::ActiveRecord::Base.connected?
