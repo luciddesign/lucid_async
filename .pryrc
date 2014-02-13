@@ -1,3 +1,5 @@
 $: << './lib'
 
-require 'lucid_client'
+require 'active_record'
+ActiveRecord::Base
+require 'lucid_async'

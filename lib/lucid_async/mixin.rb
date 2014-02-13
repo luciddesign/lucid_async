@@ -5,10 +5,10 @@ module LucidAsync
       base.extend( self )
     end
 
-    def async( &block )
-      Thread.new do
-        async_safe( &block )
-      end
+    # Maybe this should take a callback argument at some stage?
+    #
+    def async( *args, &block )
+      LucidAsync.pool.process( *args, &block )
     end
 
     # Iterate over a collection asynchronously. Blocks until all threads have
@@ -24,12 +24,12 @@ module LucidAsync
     end
 
     def async_map( collection, &block )
-      sem, results = Mutex.new, Array.new
+      lock, results = Mutex.new, Array.new
 
       async_each( collection ) do |element, i|
         result = block.call( element, i )
 
-        sem.synchronize do
+        lock.synchronize do
           results[i] = result
         end
       end
@@ -71,23 +71,6 @@ module LucidAsync
     def method_missing_check( sym )
       method = method_missing_method( sym )
       method if sym =~ /_async$/ && respond_to?( method )
-    end
-
-    # Need to close thread local ActiveRecord connections to prevent dead
-    # connections blocking on the connection pool.
-    #
-    #     async { SomeAPI.product( 123 ).save }
-    #
-    def close_connection
-      if defined?( ::ActiveRecord::Base ) && ::ActiveRecord::Base.connected?
-        ::ActiveRecord::Base.connection.close
-      end
-    end
-
-    def async_safe( &block )
-      block.call
-    ensure
-      close_connection
     end
 
   end
