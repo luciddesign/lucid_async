@@ -9,7 +9,7 @@ module LucidAsync
     def initialize( options = {} )
       super( options )
 
-      @max ||= ::ActiveRecord::Base.connection_pool.size - 1
+      @max ||= _active_record_pool.size - 1
     end
 
     def self.active_record?
@@ -26,9 +26,13 @@ module LucidAsync
           _available.signal
           threads.delete( Thread.current )
         ensure
-          close_connection
+          _close_connection
         end
       end
+    end
+
+    def _active_record_pool
+      ::ActiveRecord::Base.connection_pool
     end
 
     # Need to close thread local ActiveRecord connections to prevent dead
@@ -36,8 +40,8 @@ module LucidAsync
     #
     #     async { SomeAPI.product( 123 ).save }
     #
-    def close_connection
-      if defined?( ::ActiveRecord::Base ) && ::ActiveRecord::Base.connected?
+    def _close_connection
+      if self.class.active_record?
         ::ActiveRecord::Base.connection.close
       end
     end
