@@ -6,14 +6,18 @@ require 'lucid_async/mixin'
 module LucidAsync
 
   def self.pool
-    @pool ||= instantiate_pool
+    @pool ||= _instantiate_pool
   end
 
-  def self.instantiate_pool
-    if ActiveRecordPool.active_record?
-      ActiveRecordPool.new
-    else
-      Pool.new
+  class << self
+    private
+
+    def _instantiate_pool
+      if ActiveRecordPool.active_record?
+        ActiveRecordPool.new
+      else
+        Pool.new
+      end
     end
   end
 
