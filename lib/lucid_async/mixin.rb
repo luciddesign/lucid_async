@@ -43,8 +43,9 @@ module LucidAsync
 
     private
 
-    # For convenience, allow calling any method asynchronously with the
-    # +_async+ suffix.
+    # For convenience, allows calling any method asynchronously with the
+    # +_async+ suffix. Be very careful to ensure that any method called in
+    # this manner is thread safe!
     #
     #     def wait_a_long_time
     #       sleep 60
@@ -52,8 +53,9 @@ module LucidAsync
     #
     #     wait_a_long_time_async
     #
+    #
     def method_missing( sym, *args, &block )
-      if method = method_missing_check( sym )
+      if method = _missing_check( sym )
         async { send( method, *args, &block ) }
       else
         super
@@ -61,16 +63,19 @@ module LucidAsync
     end
 
     def respond_to_missing?( sym, include_private = false )
-      !( method_missing_check( sym ).nil? ) || super
+      !( _missing_check( sym ).nil? ) || super
     end
 
-    def method_missing_method( sym )
+    def _missing_check( sym )
+      method = _missing_method( sym )
+
+      if sym =~ /_async$/ && respond_to?( method )
+        method
+      end
+    end
+
+    def _missing_method( sym )
       sym.to_s.split( '_async' ).first
-    end
-
-    def method_missing_check( sym )
-      method = method_missing_method( sym )
-      method if sym =~ /_async$/ && respond_to?( method )
     end
 
   end
