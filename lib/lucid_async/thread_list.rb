@@ -13,10 +13,6 @@ module LucidAsync
       @max = options[:max] || nil
     end
 
-    def full?
-      _sync { max ? threads.length >= max : false }
-    end
-
     def new( *args, &block )
       _sync_unless_full do
         Thread.new( *args, &block ).tap do |thread|
@@ -41,6 +37,14 @@ module LucidAsync
 
     def each( &block )
       _loop_sync { threads.each( &block ) }
+    end
+
+    def full?
+      _sync { max ? length >= max : false }
+    end
+
+    def length
+      threads.length
     end
 
     private
