@@ -28,7 +28,7 @@ module LucidAsync
     #
     def process_each( collection, &block )
       collection_threads = collection.each_with_index.map do |*args|
-         process *args, &block
+        process *args, &block
       end
 
       _wait_for( collection_threads )
