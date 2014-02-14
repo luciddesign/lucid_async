@@ -49,10 +49,14 @@ module LucidAsync
         begin
           block.call( *args )
         ensure
-          _available.signal
-          threads.delete( Thread.current )
+          _cleanup
         end
       end
+    end
+
+    def _cleanup
+      _available.signal
+      threads.delete( Thread.current )
     end
 
     def _available

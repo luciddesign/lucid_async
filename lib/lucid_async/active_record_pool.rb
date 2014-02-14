@@ -18,17 +18,10 @@ module LucidAsync
 
     private
 
-    def _signal_block( &block )
-      -> ( *args ) do
-        begin
-          block.call( *args )
-        ensure
-          _available.signal
-          threads.delete( Thread.current )
+    def _cleanup
+      _close_connection
 
-          _close_connection
-        end
-      end
+      super
     end
 
     def _active_record_pool
