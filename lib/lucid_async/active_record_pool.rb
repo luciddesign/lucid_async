@@ -7,9 +7,9 @@ module LucidAsync
     # Each thread may potentially have its own connection.
     #
     def initialize( options = {} )
-      super( options )
+      options[:max] ||= _active_record_pool.size - 1
 
-      @max ||= _active_record_pool.size - 1
+      super( options )
     end
 
     def self.active_record?

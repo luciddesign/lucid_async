@@ -15,6 +15,9 @@ module LucidAsync
     # finished executing and returns false if any threads returned a falsey
     # value.
     #
+    # Be very careful when nesting these with a low thread pool as they can
+    # potentially block indefinitely.
+    #
     def async_each( collection, &block )
       threads = collection.each_with_index.map do|*args|
         async { block.call( *args ) }
@@ -52,7 +55,6 @@ module LucidAsync
     #     end
     #
     #     wait_a_long_time_async
-    #
     #
     def method_missing( sym, *args, &block )
       if method = _missing_check( sym )
