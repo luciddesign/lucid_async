@@ -22,10 +22,10 @@ module LucidAsync
       -> ( *args ) do
         begin
           block.call( *args )
-
+        ensure
           _available.signal
           threads.delete( Thread.current )
-        ensure
+
           _close_connection
         end
       end

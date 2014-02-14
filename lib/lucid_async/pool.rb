@@ -46,10 +46,12 @@ module LucidAsync
 
     def _signal_block( &block )
       ->( *args ) do
-        block.call( *args )
-
-        _available.signal
-        threads.delete( Thread.current )
+        begin
+          block.call( *args )
+        ensure
+          _available.signal
+          threads.delete( Thread.current )
+        end
       end
     end
 
