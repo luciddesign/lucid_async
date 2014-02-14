@@ -11,19 +11,8 @@ module LucidAsync
       LucidAsync.pool.process( *args, &block )
     end
 
-    # Iterate over a collection asynchronously. Blocks until all threads have
-    # finished executing and returns false if any threads returned a falsey
-    # value.
-    #
-    # Be very careful when nesting these with a low thread pool as they can
-    # potentially block indefinitely.
-    #
     def async_each( collection, &block )
-      threads = collection.each_with_index.map do|*args|
-        async { block.call( *args ) }
-      end
-
-      wait_for( threads )
+      LucidAsync.pool.process_each( collection, &block )
     end
 
     def async_map( collection, &block )
@@ -38,10 +27,6 @@ module LucidAsync
       end
 
       results
-    end
-
-    def wait_for( threads )
-      threads.inject( true ) { |bool, t| bool && t.value }
     end
 
     private

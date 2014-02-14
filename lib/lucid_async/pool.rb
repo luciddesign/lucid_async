@@ -22,9 +22,27 @@ module LucidAsync
       end
     end
 
+    # Execute a given block for each element in a collection asynchronously.
+    # Blocks until all threads have finished and returns +false+ if any
+    # thread returns a falsey value.
+    #
+    def process_each( collection, &block )
+      collection_threads = collection.each_with_index.map do |*args|
+         process *args, &block
+      end
+
+      _wait_for( collection_threads )
+    end
+
     private
 
     attr_reader :_thread_lock
+
+    # Returns +false+ if any thread in +threads+ returns a falsey value.
+    #
+    def _wait_for( collection_threads )
+      collection_threads.inject( true ) { |bool, t| bool && t.value }
+    end
 
     def _signal_block( &block )
       ->( *args ) do
