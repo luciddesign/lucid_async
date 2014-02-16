@@ -5,14 +5,12 @@ module LucidAsync
       base.extend( self )
     end
 
-    # Maybe this should take a callback argument at some stage?
-    #
-    def async( *args, &block )
-      LucidAsync.pool.process( *args, &block )
+    def async( options = {}, &block )
+      TaskDelegator.new( options, &block ).call( :process )
     end
 
-    def async_each( collection, &block )
-      LucidAsync.pool.process_each( collection, &block )
+    def async_each( collection, options = {}, &block )
+      TaskDelegator.new( options, &block ).call( :each_of, collection )
     end
 
     def async_map( collection, &block )

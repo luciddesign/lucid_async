@@ -1,24 +1,20 @@
+require 'lucid_async/task'
 require 'lucid_async/thread_list'
 require 'lucid_async/pool'
-require 'lucid_async/active_record_pool'
+
+require 'lucid_async/active_record/task'
+require 'lucid_async/active_record/pool'
+
 require 'lucid_async/mixin'
+require 'lucid_async/task_delegator'
+require 'lucid_async/init'
 
 module LucidAsync
 
-  def self.pool
-    @pool ||= _instantiate_pool
-  end
+  extend Init
 
-  class << self
-    private
-
-    def _instantiate_pool
-      if ActiveRecordPool.active_record?
-        ActiveRecordPool.new
-      else
-        Pool.new
-      end
-    end
+  def self.new_task( &block )
+    task_class.new( &block )
   end
 
 end

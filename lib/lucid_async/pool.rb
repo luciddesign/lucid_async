@@ -10,23 +10,25 @@ module LucidAsync
       @max = threads.max
     end
 
-    def process( *args, &block )
-      raise ArgumentError, 'no block given' unless block_given?
+    def process( task = nil, &block )
+      block = _block_arg( task, block )
 
       _sync do
         if threads.full?
           _available.wait( _thread_lock )
         end
 
-        threads.new *args, &_signal_block( &block )
+        threads.new &_signal_block( &block )
       end
     end
 
     # Execute a given block for each element in a collection asynchronously.
-    # Blocks until all threads have finished and returns +false+ if any
+    # Blocks until all threads have completed and returns +false+ if any
     # thread returns a falsey value.
     #
-    def process_each( collection, &block )
+    def each_of( collection, task = nil, &block )
+      block = _block_arg( task, block )
+
       collection_threads = collection.each_with_index.map do |*args|
         process *args, &block
       end
@@ -38,7 +40,12 @@ module LucidAsync
 
     attr_reader :_thread_lock
 
-    # Returns +false+ if any thread in +threads+ returns a falsey value.
+    def _block_arg( task, block )
+      task ? task.block : Task.new( &block ).block
+    end
+
+    # Returns +false+ if any thread in +collection_threads+ returns a falsey
+    # value.
     #
     def _wait_for( collection_threads )
       collection_threads.inject( true ) { |bool, t| bool && t.value }
