@@ -15,7 +15,7 @@ module LucidAsync
     #     async { SomeAPI.product( 123 ).save }
     #
     def _close_connection
-      if self.class.active_record?
+      if LucidAsync.active_record?
         ::ActiveRecord::Base.connection.close
       end
     end
