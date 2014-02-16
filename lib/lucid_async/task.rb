@@ -10,11 +10,7 @@ module LucidAsync
     end
 
     def process( *args, &callback )
-      @thread = Thread.new do
-        block.call( *args ).tap do |result|
-          callback.call( result ) if callback
-        end
-      end
+      @thread = Thread.new { block.call( *args, &callback ) }
     end
 
     # Create a duplicate of this task for each element in a collection and
@@ -48,12 +44,14 @@ module LucidAsync
     private
 
     def _wrap_block( block )
-      -> ( *args ) do
+      -> ( *args, &callback ) do
         begin
           @exception = nil
           @status    = :active
 
-          block.call( *args )
+          block.call( *args ).tap do |result|
+            callback.call( result ) if callback
+          end
 
         rescue => exception
           @exception = exception
