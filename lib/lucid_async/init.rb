@@ -13,5 +13,11 @@ module LucidAsync
       active_record? ? ActiveRecordTask : Task
     end
 
+    # Obviously only use this with ActiveRecord ...
+    #
+    def with_connection( &block )
+      ActiveRecord::Base.connection_pool.with_connection( &block )
+    end
+
   end
 end

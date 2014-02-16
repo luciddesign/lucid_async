@@ -27,6 +27,10 @@ module LucidAsync
       results
     end
 
+    def with_connection( &block )
+      LucidAsync.with_connecton( &block )
+    end
+
     private
 
     # For convenience, allows calling any method asynchronously with the
