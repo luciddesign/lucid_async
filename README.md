@@ -25,7 +25,7 @@ global thread pool, this is set to ActiveRecord's connection pool minus one
 
 However, this method has its own downsides. A fairly major one is that nesting
 blocks with `#async_each` or `#async_map` can cause the program to block
-indefinitely.
+indefinitely. The ActiveRecordPool also assumes a single process ...
 
 In most cases, the safest and most efficient way is simply to wrap any
 database calls inside asynchronous blocks with ActiveRecord's
