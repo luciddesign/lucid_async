@@ -10,9 +10,9 @@ module LucidAsync
 
     def call( method, *args )
       if pool
-        pool.send( method, *args, task )
+        pool.__send__( method, *args, task )
       else
-        task.send( method, *args )
+        task.__send__( method, *args )
       end
     end
 

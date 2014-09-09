@@ -13,10 +13,10 @@ module LucidAsync
       TaskDelegator.new( options, &block ).call( :each_of, collection )
     end
 
-    def async_map( collection, &block )
+    def async_map( collection, options = {}, &block )
       lock, results = Mutex.new, Array.new
 
-      async_each( collection ) do |element, i|
+      async_each( collection, options ) do |element, i|
         result = block.call( element, i )
 
         lock.synchronize do
@@ -45,7 +45,7 @@ module LucidAsync
     #
     def method_missing( sym, *args, &block )
       if method = _missing_check( sym )
-        async { send( method, *args, &block ) }
+        async { __send__( method, *args, &block ) }
       else
         super
       end

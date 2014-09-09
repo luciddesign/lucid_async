@@ -6,7 +6,13 @@ module LucidAsync
     end
 
     def pool
-      @pool ||= active_record? ? ActiveRecordPool.new : Pool.new
+      return @pool if @pool
+
+      @pool = if active_record?
+        ActiveRecordPool.new( _pool_options )
+      else
+        Pool.new( _pool_options )
+      end
     end
 
     def task_class
@@ -17,6 +23,16 @@ module LucidAsync
     #
     def with_connection( &block )
       ActiveRecord::Base.connection_pool.with_connection( &block )
+    end
+
+    private
+
+    def _pool_options
+      if m = ENV['LA_POOL']
+        return { :max => m.to_i }
+      end
+
+      Hash.new
     end
 
   end

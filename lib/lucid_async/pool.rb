@@ -29,11 +29,11 @@ module LucidAsync
     def each_of( collection, task = nil, &block )
       block = _block_arg( task, block )
 
-      collection_threads = collection.each_with_index.map do |*args|
-        process *args, &block
+      t = collection.each_with_index.map do |*args|
+        process { block.call( *args ) }
       end
 
-      _wait_for( collection_threads )
+      _wait_for( t )
     end
 
     private
